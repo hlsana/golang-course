@@ -47,55 +47,50 @@ func main() {
 		Occupation: "Zookeeper",
 	}
 
-	if Lion.IsInCage == !true {
+	if !Lion.IsInCage {
 		Lion.IsInCage = true
 	}
-	if Zebra.IsInCage == !true {
+	if !Zebra.IsInCage {
 		Zebra.IsInCage = true
 	}
-	if Hippo.IsInCage == !true {
+	if !Hippo.IsInCage {
 		Hippo.IsInCage = true
 	}
-	if Penguin.IsInCage == !true {
+	if !Penguin.IsInCage {
 		Penguin.IsInCage = true
 	}
-	if Giraffe.IsInCage == !true {
+	if !Giraffe.IsInCage {
 		Giraffe.IsInCage = true
 	}
 
 	println(Zookeeper.Occupation, Zookeeper.FirstName, Zookeeper.LastName, "starts catching runaway animals.")
-	switch Lion.IsInCage {
-	case true:
+	if Lion.IsInCage {
 		println(Lion.Species, Lion.Name, "has been caught.")
-	case false:
+	} else {
 		println(Lion.Species, Lion.Name, "hasn't been caught.")
 	}
 
-	switch Zebra.IsInCage {
-	case true:
+	if Zebra.IsInCage {
 		println(Zebra.Species, Zebra.Name, "has been caught.")
-	case false:
+	} else {
 		println(Zebra.Species, Zebra.Name, "hasn't been caught.")
 	}
 
-	switch Hippo.IsInCage {
-	case true:
+	if Hippo.IsInCage {
 		println(Hippo.Species, Hippo.Name, "has been caught.")
-	case false:
+	} else {
 		println(Hippo.Species, Hippo.Name, "hasn't been caught,")
 	}
 
-	switch Penguin.IsInCage {
-	case true:
+	if Penguin.IsInCage {
 		println(Penguin.Species, Penguin.Name, "has been caught.")
-	case false:
+	} else {
 		println(Penguin.Species, Penguin.Name, "hasn't been caught.")
 	}
 
-	switch Giraffe.IsInCage {
-	case true:
+	if Giraffe.IsInCage {
 		println(Giraffe.Species, Giraffe.Name, "has been caught.")
-	case false:
+	} else {
 		println(Giraffe.Species, Giraffe.Name, "hasn't been caught.")
 	}
 
