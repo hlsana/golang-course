@@ -2,6 +2,15 @@ package main
 
 import "fmt"
 
+const (
+	Left    = "left"
+	Right   = "right"
+	Knife   = "knife"
+	Lighter = "lighter"
+	Yes     = "yes"
+	No      = "no"
+)
+
 type Character struct {
 	Name       string
 	HasKnife   bool
@@ -37,22 +46,22 @@ func main() {
 		fmt.Scan(&Player1.ItemChoice)
 
 		switch Player1.ItemChoice {
-		case "knife":
+		case Knife:
 			Player1.HasKnife = true
-		case "lighter":
+		case Lighter:
 			Player1.HasLighter = true
 		default:
 			println("Try again!")
 		}
-		if Player1.ItemChoice == "knife" || Player1.ItemChoice == "lighter" {
+		if Player1.ItemChoice == Knife || Player1.ItemChoice == Lighter {
 			break
 		}
 	}
 	fmt.Println("You grab the", Player1.ItemChoice, "and decide to get out of the cave.")
 
 	if !Player1.HasLighter {
-		fmt.Println("You don't have a light sourse, so you stumble in the dark until you see a passage to the left.")
-		Player1.DirectionChoice = "left"
+		fmt.Println("You don't have a light source, so you stumble in the dark until you see a passage to the left.")
+		Player1.DirectionChoice = Left
 	} else {
 		fmt.Println("The light coming from the lighter illuminates your path ahead. Soon you see two passageways, to your left and right. Which one do you choose?")
 		fmt.Scan(&Player1.DirectionChoice)
@@ -60,19 +69,19 @@ func main() {
 
 	for {
 		switch Player1.DirectionChoice {
-		case "left":
-		case "right":
+		case Left:
+		case Right:
 		default:
 			println("Try again!")
 			fmt.Scan(&Player1.DirectionChoice)
 		}
-		if Player1.DirectionChoice == "left" || Player1.DirectionChoice == "right" {
+		if Player1.DirectionChoice == Left || Player1.DirectionChoice == Right {
 			break
 		}
 	}
 
 	switch Player1.DirectionChoice {
-	case "left":
+	case Left:
 		fmt.Println("The passage gets you out of the cave, and you see an abandoned campsite. You decide to go there and search for something useful.")
 		fmt.Println("When you approach the campsite, a wild dog suddenly attacks you.")
 		if Player1.HasKnife {
@@ -87,15 +96,15 @@ func main() {
 			fmt.Scan(&Player1.SearchCamp)
 
 			switch Player1.SearchCamp {
-			case "yes":
+			case Yes:
 				fmt.Println("You look around and find a rope. It might be useful!")
 				Player1.HasRope = true
-			case "no":
+			case No:
 				fmt.Println("You decide to be cautious and keep moving.")
 			default:
 				println("Try again!")
 			}
-			if Player1.SearchCamp == "yes" || Player1.SearchCamp == "no" {
+			if Player1.SearchCamp == Yes || Player1.SearchCamp == No {
 				break
 			}
 		}
@@ -113,7 +122,7 @@ func main() {
 			fmt.Println("You don't have a rope to help you get down safely, so you fall down and die. Better luck next time!")
 			Player1.IsAlive = false
 		}
-	case "right":
+	case Right:
 		fmt.Println("You keep going until you find yourself in another cave chamber full of spiders. One of them climbs up your leg and bites you.")
 		fmt.Println("You suddenly feel dizzy and cannot walk. Your vision blackens. The spider was deadly poisonous.")
 		fmt.Println("Your death is quick. If only you have made a different choice...")
@@ -127,3 +136,4 @@ func main() {
 		fmt.Println("GAME OVER")
 	}
 }
+
