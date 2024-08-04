@@ -13,9 +13,9 @@ type Character struct {
 }
 
 type Choice struct {
-	KnifeOrLighter string
-	LeftOrRight    string
-	SearchCamp     string
+	ItemChoice      string
+	DirectionChoice string
+	SearchCamp      string
 }
 
 func main() {
@@ -34,9 +34,9 @@ func main() {
 
 	for {
 
-		fmt.Scan(&Player1.KnifeOrLighter)
+		fmt.Scan(&Player1.ItemChoice)
 
-		switch Player1.KnifeOrLighter {
+		switch Player1.ItemChoice {
 		case "knife":
 			Player1.HasKnife = true
 		case "lighter":
@@ -44,34 +44,34 @@ func main() {
 		default:
 			println("Try again!")
 		}
-		if Player1.KnifeOrLighter == "knife" || Player1.KnifeOrLighter == "lighter" {
+		if Player1.ItemChoice == "knife" || Player1.ItemChoice == "lighter" {
 			break
 		}
 	}
-	fmt.Println("You grab the", Player1.KnifeOrLighter, "and decide to get out of the cave.")
+	fmt.Println("You grab the", Player1.ItemChoice, "and decide to get out of the cave.")
 
 	if !Player1.HasLighter {
 		fmt.Println("You don't have a light sourse, so you stumble in the dark until you see a passage to the left.")
-		Player1.LeftOrRight = "left"
+		Player1.DirectionChoice = "left"
 	} else {
 		fmt.Println("The light coming from the lighter illuminates your path ahead. Soon you see two passageways, to your left and right. Which one do you choose?")
-		fmt.Scan(&Player1.LeftOrRight)
+		fmt.Scan(&Player1.DirectionChoice)
 	}
 
 	for {
-		switch Player1.LeftOrRight {
+		switch Player1.DirectionChoice {
 		case "left":
 		case "right":
 		default:
 			println("Try again!")
-			fmt.Scan(&Player1.LeftOrRight)
+			fmt.Scan(&Player1.DirectionChoice)
 		}
-		if Player1.LeftOrRight == "left" || Player1.LeftOrRight == "right" {
+		if Player1.DirectionChoice == "left" || Player1.DirectionChoice == "right" {
 			break
 		}
 	}
 
-	switch Player1.LeftOrRight {
+	switch Player1.DirectionChoice {
 	case "left":
 		fmt.Println("The passage gets you out of the cave, and you see an abandoned campsite. You decide to go there and search for something useful.")
 		fmt.Println("When you approach the campsite, a wild dog suddenly attacks you.")
