@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"os"
-
 	"password-manager/internal/manager"
 	"password-manager/internal/storage"
 )
@@ -12,29 +11,44 @@ func main() {
 	storage := storage.NewStorage("passwords.txt")
 	manager := manager.NewManager(storage)
 
-	for {
-		fmt.Println("\nPassword Manager")
-		fmt.Println("1. List passwords")
-		fmt.Println("2. Save password")
-		fmt.Println("3. Get password")
-		fmt.Println("4. Exit")
-		fmt.Print("Choose an option: ")
+	if len(os.Args) < 2 {
+		fmt.Println("Usage:")
+		fmt.Println("  ./password-manager save <name> <password>")
+		fmt.Println("  ./password-manager get <name>")
+		fmt.Println("  ./password-manager get-all")
+		return
+	}
 
-		var choice int
-		fmt.Scanln(&choice)
+	command := os.Args[1]
 
-		switch choice {
-		case 1:
-			manager.ListPasswordNames()
-		case 2:
-			manager.SavePassword()
-		case 3:
-			manager.GetPassword()
-		case 4:
-			fmt.Println("Exiting...")
-			os.Exit(0)
-		default:
-			fmt.Println("Invalid choice, please try again.")
+	switch command {
+	case "save":
+		if len(os.Args) != 4 {
+			fmt.Println("Usage: ./password-manager save <name> <password>")
+			return
 		}
+		name := os.Args[2]
+		password := os.Args[3]
+		err := manager.SavePassword(name, password)
+		if err != nil {
+			fmt.Println("Error saving password:", err)
+		} else {
+			fmt.Println("Password saved successfully!")
+		}
+	case "get":
+		if len(os.Args) != 3 {
+			fmt.Println("Usage: ./password-manager get <name>")
+			return
+		}
+		name := os.Args[2]
+		manager.GetPassword(name)
+	case "get-all":
+		manager.ListPasswordNames()
+	default:
+		fmt.Println("Unknown command:", command)
+		fmt.Println("Usage:")
+		fmt.Println("  ./password-manager save <name> <password>")
+		fmt.Println("  ./password-manager get <name>")
+		fmt.Println("  ./password-manager get-all")
 	}
 }
