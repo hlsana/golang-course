@@ -1,11 +1,7 @@
 package manager
 
 import (
-	"bufio"
 	"fmt"
-	"os"
-	"strings"
-
 	"password-manager/internal/storage"
 )
 
@@ -17,32 +13,11 @@ func NewManager(s *storage.Storage) *Manager {
 	return &Manager{storage: s}
 }
 
-func (m *Manager) SavePassword() {
-	reader := bufio.NewReader(os.Stdin)
-
-	fmt.Print("Enter name: ")
-	name, _ := reader.ReadString('\n')
-	name = strings.TrimSpace(name)
-
-	fmt.Print("Enter password: ")
-	password, _ := reader.ReadString('\n')
-	password = strings.TrimSpace(password)
-
-	err := m.storage.SavePassword(name, password)
-	if err != nil {
-		fmt.Println("Error saving password:", err)
-	} else {
-		fmt.Println("Password saved successfully!")
-	}
+func (m *Manager) SavePassword(name, password string) error {
+	return m.storage.SavePassword(name, password)
 }
 
-func (m *Manager) GetPassword() {
-	reader := bufio.NewReader(os.Stdin)
-
-	fmt.Print("Enter name: ")
-	name, _ := reader.ReadString('\n')
-	name = strings.TrimSpace(name)
-
+func (m *Manager) GetPassword(name string) {
 	passwords, err := m.storage.LoadPasswords()
 	if err != nil {
 		fmt.Println("Error loading passwords:", err)
