@@ -2,6 +2,7 @@ package repository
 
 import (
 	"errors"
+	"sync"
 	"time"
 	"travel-agency/internal/models"
 )
@@ -11,6 +12,7 @@ var (
 )
 
 type TourRepository struct {
+	mu          sync.Mutex
 	tours       []models.Tour
 	orders      []models.TourOrder
 	nextTourID  int
@@ -29,10 +31,16 @@ func NewTourRepository() *TourRepository {
 }
 
 func (r *TourRepository) GetAvailableTours() []models.Tour {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
 	return r.tours
 }
 
 func (r *TourRepository) GetTourByID(id int) (models.Tour, error) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
 	for _, t := range r.tours {
 		if t.ID == id {
 			return t, nil
@@ -42,6 +50,9 @@ func (r *TourRepository) GetTourByID(id int) (models.Tour, error) {
 }
 
 func (r *TourRepository) SaveOrder(order models.TourOrder) models.TourOrder {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
 	order.ID = r.nextOrderID
 	r.nextOrderID++
 	r.orders = append(r.orders, order)
@@ -49,6 +60,9 @@ func (r *TourRepository) SaveOrder(order models.TourOrder) models.TourOrder {
 }
 
 func (r *TourRepository) GetOrdersByUserID(userID int) []models.TourOrder {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
 	var orders []models.TourOrder
 	for _, o := range r.orders {
 		if o.UserID == userID {
