@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"encoding/json"
+	"log"
 	"main/hw17/models"
 	"net/http"
 	"time"
@@ -32,7 +33,14 @@ func (h *TaskHandlers) CreateTask(w http.ResponseWriter, r *http.Request) {
 
 	h.Manager.AddTask(task)
 
-	h.Cache.Set(context.Background(), task.ID, task, 10*time.Minute)
+	taskJSON, err := json.Marshal(task)
+	if err != nil {
+		log.Printf("Failed to marshal task for caching: %v", err)
+	} else {
+		if err := h.Cache.Set(context.Background(), task.ID, taskJSON, 10*time.Minute).Err(); err != nil {
+			log.Printf("Failed to write task to cache: %v", err)
+		}
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(task)
@@ -50,14 +58,27 @@ func (h *TaskHandlers) GetTask(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		taskJSON, _ := json.Marshal(task)
-		h.Cache.Set(context.Background(), id, taskJSON, 10*time.Minute)
+		taskJSON, err := json.Marshal(task)
+		if err != nil {
+			log.Printf("Failed to marshal task for caching: %v", err)
+		} else {
+			if err := h.Cache.Set(context.Background(), id, taskJSON, 10*time.Minute).Err(); err != nil {
+				log.Printf("Failed to write task to cache: %v", err)
+			}
+		}
 
 		w.Header().Set("Content-Type", "application/json")
 		w.Write(taskJSON)
 	} else if err != nil {
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
-		return
+		log.Printf("Cache error: %v", err)
+		task, exists := h.Manager.GetTask(id)
+		if !exists {
+			http.Error(w, "Task not found", http.StatusNotFound)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(task)
 	} else {
 		w.Header().Set("Content-Type", "application/json")
 		w.Write([]byte(taskJSON))
@@ -65,10 +86,31 @@ func (h *TaskHandlers) GetTask(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *TaskHandlers) GetAllTasks(w http.ResponseWriter, r *http.Request) {
-	tasks := h.Manager.GetAllTasks()
+	tasksJSON, err := h.Cache.Get(context.Background(), "all_tasks").Result()
+	if err == redis.Nil {
+		tasks := h.Manager.GetAllTasks()
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(tasks)
+		tasksJSON, err := json.Marshal(tasks)
+		if err != nil {
+			log.Printf("Failed to marshal tasks for caching: %v", err)
+		} else {
+			if err := h.Cache.Set(context.Background(), "all_tasks", tasksJSON, 10*time.Minute).Err(); err != nil {
+				log.Printf("Failed to write tasks to cache: %v", err)
+			}
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(tasksJSON)
+	} else if err != nil {
+		log.Printf("Cache error: %v", err)
+		tasks := h.Manager.GetAllTasks()
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(tasks)
+	} else {
+		w.Header().Set("Content-Type", "application/json")
+		w.Write([]byte(tasksJSON))
+	}
 }
 
 func (h *TaskHandlers) UpdateTask(w http.ResponseWriter, r *http.Request) {
@@ -88,8 +130,14 @@ func (h *TaskHandlers) UpdateTask(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	taskJSON, _ := json.Marshal(updatedTask)
-	h.Cache.Set(context.Background(), id, taskJSON, 10*time.Minute)
+	taskJSON, err := json.Marshal(updatedTask)
+	if err != nil {
+		log.Printf("Failed to marshal task for caching: %v", err)
+	} else {
+		if err := h.Cache.Set(context.Background(), id, taskJSON, 10*time.Minute).Err(); err != nil {
+			log.Printf("Failed to write task to cache: %v", err)
+		}
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(taskJSON)
@@ -104,7 +152,9 @@ func (h *TaskHandlers) DeleteTask(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	h.Cache.Del(context.Background(), id)
+	if err := h.Cache.Del(context.Background(), id).Err(); err != nil {
+		log.Printf("Failed to delete task from cache: %v", err)
+	}
 
 	w.WriteHeader(http.StatusNoContent)
 }
