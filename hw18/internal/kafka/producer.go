@@ -20,9 +20,12 @@ func StartProducer() {
 
 	defer writer.Close()
 
+	ticker := time.NewTicker(1 * time.Second)
+	defer ticker.Stop()
+
 	for {
 		orange := models.Orange{
-			Size: rand.Float64()*10 + 2, 
+			Size: rand.Float64()*10 + 2,
 		}
 
 		orangeBytes, err := json.Marshal(orange)
@@ -43,6 +46,6 @@ func StartProducer() {
 
 		log.Printf("Produced orange with size: %.2f cm", orange.Size)
 
-		time.Sleep(1 * time.Second)
+		<-ticker.C
 	}
 }
