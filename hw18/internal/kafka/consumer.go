@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"sync"
 	"time"
 
 	"github.com/segmentio/kafka-go"
@@ -21,11 +22,16 @@ func StartConsumer() {
 	defer reader.Close()
 
 	basket := models.Basket{}
+	var mu sync.Mutex 
+
 	ticker := time.NewTicker(10 * time.Second)
+	defer ticker.Stop()
 
 	go func() {
 		for range ticker.C {
+			mu.Lock()
 			fmt.Printf("Oranges: small=%d, medium=%d, large=%d\n", basket.Small, basket.Medium, basket.Large)
+			mu.Unlock()
 		}
 	}()
 
@@ -42,6 +48,7 @@ func StartConsumer() {
 			continue
 		}
 
+		mu.Lock()
 		switch {
 		case orange.Size < 5:
 			basket.Small++
@@ -50,5 +57,6 @@ func StartConsumer() {
 		default:
 			basket.Large++
 		}
+		mu.Unlock()
 	}
 }
