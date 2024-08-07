@@ -2,6 +2,8 @@ package handler
 
 import (
     "encoding/json"
+    "errors"
+    "fmt"
     "main/hw16/models"
     "net/http"
     "github.com/gorilla/mux"
@@ -25,7 +27,7 @@ func (h *TaskHandlers) CreateTask(w http.ResponseWriter, r *http.Request) {
 
     err := h.Manager.AddTask(task)
     if err != nil {
-        http.Error(w, "Unable to create task", http.StatusInternalServerError)
+        http.Error(w, fmt.Sprintf("Unable to create task: %v", err), http.StatusInternalServerError)
         return
     }
     w.Header().Set("Content-Type", "application/json")
@@ -38,7 +40,11 @@ func (h *TaskHandlers) GetTask(w http.ResponseWriter, r *http.Request) {
 
     task, err := h.Manager.GetTask(id)
     if err != nil {
-        http.Error(w, "Task not found", http.StatusNotFound)
+        if errors.Is(err, models.ErrNotFound) {
+            http.Error(w, "Task not found", http.StatusNotFound)
+        } else {
+            http.Error(w, fmt.Sprintf("Failed to retrieve task: %v", err), http.StatusInternalServerError)
+        }
         return
     }
 
@@ -49,7 +55,7 @@ func (h *TaskHandlers) GetTask(w http.ResponseWriter, r *http.Request) {
 func (h *TaskHandlers) GetAllTasks(w http.ResponseWriter, r *http.Request) {
     tasks, err := h.Manager.GetAllTasks()
     if err != nil {
-        http.Error(w, "Unable to fetch tasks", http.StatusInternalServerError)
+        http.Error(w, fmt.Sprintf("Unable to fetch tasks: %v", err), http.StatusInternalServerError)
         return
     }
 
@@ -71,7 +77,11 @@ func (h *TaskHandlers) UpdateTask(w http.ResponseWriter, r *http.Request) {
 
     err := h.Manager.UpdateTask(updatedTask)
     if err != nil {
-        http.Error(w, "Unable to update task", http.StatusInternalServerError)
+        if errors.Is(err, models.ErrNotFound) {
+            http.Error(w, "Task not found", http.StatusNotFound)
+        } else {
+            http.Error(w, fmt.Sprintf("Unable to update task: %v", err), http.StatusInternalServerError)
+        }
         return
     }
 
@@ -85,7 +95,11 @@ func (h *TaskHandlers) DeleteTask(w http.ResponseWriter, r *http.Request) {
 
     err := h.Manager.DeleteTask(id)
     if err != nil {
-        http.Error(w, "Task not found", http.StatusNotFound)
+        if errors.Is(err, models.ErrNotFound) {
+            http.Error(w, "Task not found", http.StatusNotFound)
+        } else {
+            http.Error(w, fmt.Sprintf("Failed to delete task: %v", err), http.StatusInternalServerError)
+        }
         return
     }
 
